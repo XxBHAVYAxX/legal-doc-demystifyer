@@ -114,32 +114,20 @@ def initialize_session_state():
         st.session_state.document_text = ""
 
 def setup_api_keys():
-    """Setup and validate API keys"""
-    st.sidebar.header("🔑 API Configuration")
-    
-    gemini_api_key = os.getenv('GEMINI_API_KEY', '')
+    """Setup and validate API keys silently"""
+    # Get API key from environment (no sidebar display)
+    gemini_api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyAdmjoDR8vw9RZV_77JPlreXgOZRx5p5dc')
     
     if not gemini_api_key:
-        gemini_api_key = st.sidebar.text_input(
-            "Enter Gemini API Key:",
-            type="password",
-            help="Get your API key from Google AI Studio"
-        )
-    
-    if gemini_api_key:
-        os.environ['AIzaSyAdmjoDR8vw9RZV_77JPlreXgOZRx5p5dc'] = gemini_api_key
-        
-        try:
-            if st.session_state.processor is None:
-                st.session_state.processor = EnhancedLegalDocumentProcessor()
-            st.sidebar.success("✅ API Key configured successfully!")
-            return True
-        except Exception as e:
-            st.sidebar.error(f"❌ API Key validation failed: {str(e)}")
-            return False
-    else:
-        st.sidebar.warning("⚠️ Please enter your Gemini API Key to continue")
         return False
+    else:
+        # Initialize processor if not already done
+        if st.session_state.processor is None:
+            try:
+                st.session_state.processor = EnhancedLegalDocumentProcessor()
+            except Exception as e:
+                return False
+        return True
 
 def analysis_options_section():
     """Configure analysis options"""
@@ -430,24 +418,14 @@ def main():
     initialize_session_state()
     
     # Header
-    st.markdown('<div class="main-header">⚖️ Legal Document Analysis MVP</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">⚖️ Legal-Doc-Demystifyer </div>', unsafe_allow_html=True)
     st.markdown("### Enhanced with Clause Extraction & Smart Q&A")
     
-    # Setup API keys
+    # Setup API keys silently
     api_configured = setup_api_keys()
     
     if not api_configured:
-        st.warning("Please configure your Gemini API key in the sidebar to continue.")
-        st.info("""
-        **MVP Features:**
-        - 📋 **Legal Clause Extraction**: Automatically identifies and categorizes key legal clauses
-        - 🤔 **Smart Q&A**: Ask questions about your document and get AI-powered answers
-        - 🔍 **Intelligent Search**: Search through document content with context-aware results
-        - 🎯 **Clause Highlighting**: Visual highlighting of important contract provisions
-        - 📊 **Enhanced Analytics**: Comprehensive analysis with interactive visualizations
-        
-        Get started by entering your Gemini API key in the sidebar!
-        """)
+        st.error("❌ Missing Gemini API Key. Please add GEMINI_API_KEY to your .env file.")
         return
     
     # Analysis options
@@ -518,8 +496,7 @@ def main():
     st.markdown("""
     <div style='text-align: center; color: #666;'>
         <strong>MVP Features:</strong> Clause Extraction • Smart Q&A • Document Search<br>
-        Built with ❤️ using Google GenAI Tools • Streamlit • Python<br>
-        <small>Perfect for hackathons and legal document analysis</small>
+        Built with ❤️ Bhavya and Abhinav (dev)<br>
     </div>
     """, unsafe_allow_html=True)
 
